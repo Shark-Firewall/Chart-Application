@@ -1,9 +1,8 @@
 import React, { useEffect } from "react";
 import Login from "./componets/login";
+import Chat from "./componets/Chat";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import "./App.css";
-// import Header from "./componets/Header";
-// import Body from "./componets/Body";
-// import Base from "./componets/Base";
 import socketIO from "socket.io-client";
 
 const ENDPOINT = "http://localhost:4000/";
@@ -14,18 +13,14 @@ function App() {
     socket.on("connect", () => {
       alert("connected");
     });
-  }, []);
+  });
 
   return (
     <>
-      <Login />
-      {/* <div className="body">
-        <div className="App">
-          <Header />
-          <Body />
-          <Base />
-        </div>
-      </div> */}
+      <Router>
+        <Route exact path="/" component={Login} />
+        <Route path="/chat" component={Chat} />
+      </Router>
     </>
   );
 }

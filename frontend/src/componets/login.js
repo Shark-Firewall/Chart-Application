@@ -1,7 +1,6 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "../App.css";
-import { Outlet, Link } from "react-router-dom";
-import 
 
 let user;
 
@@ -24,11 +23,12 @@ function Login() {
           value={userName}
           onChange={onChangeHandler}
         ></input>
-        <Link to="/chat">
-          <button onClick={submitHandler}>Submit</button>
+        <Link to="/Chat">
+          <button as={Link} to="/Chat" onClick={submitHandler}>
+            Submit
+          </button>
         </Link>
       </div>
-      <Outlet />
     </div>
   );
 }
