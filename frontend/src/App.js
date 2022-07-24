@@ -1,25 +1,18 @@
-import React, { useEffect } from "react";
-import Login from "./componets/login";
-import Chat from "./componets/Chat";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import React from "react";
+import Main from "./Componets/Main";
+import Chat from "./Componets/Chat";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
-import socketIO from "socket.io-client";
-
-const ENDPOINT = "http://localhost:4000/";
 
 function App() {
-  const socket = socketIO(ENDPOINT, { transports: ["websocket"] });
-  useEffect(() => {
-    socket.on("connect", () => {
-      alert("connected");
-    });
-  });
-
   return (
     <>
       <Router>
-        <Route exact path="/" component={Login} />
-        <Route path="/chat" component={Chat} />
+        <Routes>
+          <Route index element={<Main />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="*" element={<h1>404! Page not Found !</h1>} />
+        </Routes>
       </Router>
     </>
   );
