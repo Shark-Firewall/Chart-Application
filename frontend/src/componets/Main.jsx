@@ -11,6 +11,7 @@ export default function Main() {
   const handlerChange = (e) => {
     setuser(e.target.value);
   };
+  
   const validation = () => {
     if (!user) {
       seterror("Please enter your name");

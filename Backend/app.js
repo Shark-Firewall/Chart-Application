@@ -1,7 +1,7 @@
 const http = require("http");
 const express = require("express");
 const cors = require("cors");
-const socketIO = require("socket.io");
+const { Server } = require("socket.io");
 require("dotenv").config();
 
 const app = express();
@@ -10,14 +10,19 @@ app.use(cors());
 
 const server = http.createServer(app);
 
-const io = socketIO(server);
-
-app.get("/", (req, res) => {
-  res.send("Welcome");
+const io = new Server(server, {
+  cors: {
+    origin: "https://localhost:3000",
+    methods: ["GET", "POST"],
+  },
 });
 
-io.on("connection", () => {
-  console.log("Connection established");
+app.get("/", (req, res) => {
+  res.send("S-Chat");
+});
+
+io.on("connection", (socket) => {
+  console.log(socket.id);
 });
 
 server.listen(process.env.PORT, () => {

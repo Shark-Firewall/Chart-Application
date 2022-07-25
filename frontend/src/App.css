@@ -69,6 +69,11 @@
   font-size: 14px;
 }
 
+.input-container {
+  display: flex;
+  flex-direction: row;
+}
+
 textarea {
   width: 100%;
   border: none;
