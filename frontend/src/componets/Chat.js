@@ -1,73 +1,87 @@
-import React from "react";
-import "../App.css";
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import socketIO from "socket.io-client";
+import React, { useEffect, useState } from "react";
+import { user } from "./Main";
+import socketIo from "socket.io-client";
+import "./Chat.css";
+import Message from "./Message";
+import ReactScrollToBottom from "react-scroll-to-bottom";
+
+let socket;
 
 const ENDPOINT = "http://localhost:4000/";
 
-function Chat() {
-  const [user, setuser] = useState("");
-  const [msg, setMsg] = useState("");
-  const [allmessages, setAllmessages] = useState([]);
-  let location = useLocation();
+const Chat = () => {
+  const [id, setid] = useState("");
+  const [messages, setMessages] = useState([]);
 
-  const socket = socketIO(ENDPOINT, { transports: ["websocket"] });
+  const send = () => {
+    const message = document.getElementById("chatInput").value;
+    socket.emit("message", { message, id });
+    document.getElementById("chatInput").value = "";
+  };
 
   useEffect(() => {
+    socket = socketIo(ENDPOINT, { transports: ["websocket"] });
+
     socket.on("connect", () => {
-      console.log("Connected");
+      setid(socket.id);
     });
+    socket.emit("joined", { user });
+
+    socket.on("welcome", (data) => {
+      setMessages([...messages, data]);
+    });
+
+    socket.on("userJoined", (data) => {
+      setMessages([...messages, data]);
+    });
+
+    socket.on("leave", (data) => {
+      setMessages([...messages, data]);
+    });
+
+    return () => {
+      socket.emit("disconnect");
+      socket.off();
+    };
   }, []);
 
   useEffect(() => {
-    setuser(location.state);
-  }, [location]);
-
-  const handleChange = (e) => {
-    setMsg(e.target.value);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      const newMessage = { time: new Date(), msg, name: user };
-      setAllmessages([...allmessages, newMessage]);
-    }
-  };
+    socket.on("sendMessage", (data) => {
+      setMessages([...messages, data]);
+    });
+    return () => {
+      socket.off();
+    };
+  }, [messages]);
 
   return (
-    <div className="body">
-      <div className="App">
-        <div className="brand">
-          <h4>Shark</h4>
+    <div className="chatPage">
+      <div className="chatContainer">
+        <div className="header">
+          <h2>S CHAT</h2>
         </div>
-        <div className="message_area">
-          {allmessages.map((msg) => {
-            return user === msg.name ? (
-              <div className="message outgoing">
-                <h4>{msg.name}</h4>
-                <p>{msg.msg}</p>
-              </div>
-            ) : (
-              <div className="message incoming">
-                <h4>{msg.name}</h4>
-                <p>{msg.msg}</p>
-              </div>
-            );
-          })}
-        </div>
-        <div className="input-container">
-          <textarea
-            cols={30}
-            rows={1}
-            onKeyPress={handleKeyPress}
-            onChange={handleChange}
-            placeholder={"Enter your message..."}
-          ></textarea>
+        <ReactScrollToBottom className="chatBox">
+          {messages.map((item, i) => (
+            <Message
+              user={item.id === id ? "" : item.user}
+              message={item.message}
+              classs={item.id === id ? "right" : "left"}
+            />
+          ))}
+        </ReactScrollToBottom>
+        <div className="inputBox">
+          <input
+            onKeyPress={(event) => (event.key === "Enter" ? send() : null)}
+            type="text"
+            id="chatInput"
+          />
+          <button onClick={send} className="sendBtn">
+            Send
+          </button>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Chat;

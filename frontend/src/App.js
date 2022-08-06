@@ -3,10 +3,23 @@ import Main from "./Componets/Main";
 import Chat from "./Componets/Chat";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <>
+      <div>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            success: {
+              theme: {
+                primary: "success",
+              },
+            },
+          }}
+        ></Toaster>
+      </div>
       <Router>
         <Routes>
           <Route index element={<Main />} />
@@ -16,6 +29,7 @@ function App() {
       </Router>
     </>
   );
+  
 }
 
 export default App;

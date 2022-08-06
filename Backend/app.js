@@ -1,30 +1,42 @@
 const http = require("http");
 const express = require("express");
 const cors = require("cors");
-const { Server } = require("socket.io");
-require("dotenv").config();
+const socketIO = require("socket.io");
 
 const app = express();
-// creating server configuration
+const port = process.env.PORT || 4000;
+
+const users = [{}];
+
 app.use(cors());
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: "https://localhost:3000",
-    methods: ["GET", "POST"],
-  },
-});
-
-app.get("/", (req, res) => {
-  res.send("S-Chat");
-});
+const io = socketIO(server);
 
 io.on("connection", (socket) => {
-  console.log(socket.id);
+  socket.on("joined", ({ user }) => {
+    users[socket.id] = user;
+    socket.broadcast.emit("userJoined", {
+      user: "Admin",
+      message: ` ${users[socket.id]} has joined`,
+    });
+    socket.emit("welcome", {
+      user: "Admin",
+      message: `Welcome to the chat, ${users[socket.id]} `,
+    });
+  });
+
+  socket.on("message", ({ message, id }) => {
+    io.emit("sendMessage", { user: users[id], message, id });
+  });
+
+  socket.on("disconnect", () => {
+    socket.broadcast.emit("leave", {
+      user: "Admin",
+      message: `${users[socket.id]}  has left`,
+    });
+  });
 });
 
-server.listen(process.env.PORT, () => {
-  console.log(`listening on port http://localhost:${process.env.PORT}`);
-});
+server.listen(port);
